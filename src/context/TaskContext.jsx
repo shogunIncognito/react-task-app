@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect } from 'react'
-import tasks from '../data/task'
+import { db } from '../config/db'
+import { addDoc, deleteDoc, collection, query, onSnapshot, doc } from 'firebase/firestore'
 
 export const TaskContext = createContext()
 
@@ -7,19 +8,30 @@ export function TaskContextProvider(props) {
   const [task, setTask] = useState([])
 
   useEffect(() => {
-    setTask(tasks)
-  }, [])
-  
-  const createTask = (nTask, nDescrip) => {
-    setTask([...task, {
-      id: task.length + 1,
-      title: nTask,
-      description: nDescrip
-    }])
+    const q = query(collection(db, "tareas"));
+    onSnapshot(q, (querySnapshot) => {
+      const taskdb = [];
+      querySnapshot.forEach((doc) => {
+        taskdb.push({ ...doc.data(), id: doc.id });
+      });
+      setTask(taskdb)
+    });
+  }, []);
+
+  const createTask = async (nTask, nDescrip) => {
+    try {
+      await addDoc(collection(db, 'tareas'), {
+        title: nTask,
+        description: nDescrip
+      })
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   const deleteTask = (id) => {
-    setTask(task.filter(tas => tas.id != id));
+    const docRef = doc(db, "tareas", id);
+    deleteDoc(docRef)
   }
 
   return (

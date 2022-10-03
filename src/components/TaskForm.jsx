@@ -13,7 +13,7 @@ export function TaskForm() {
         setTitle(e.target.value);
     }
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async(e) => {
         e.preventDefault();
 
         if (title.trim().length === 0 || descrip.trim().length === 0) {
